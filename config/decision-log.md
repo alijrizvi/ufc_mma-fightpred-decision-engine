@@ -133,3 +133,17 @@
 * **Status:** Proposed [ALI to confirm]
 * **Decision:** A fighter needs at least 7 UFC bouts for a full card; fewer gets a "provisional" card using Bayesian shrinkage. `stale` flag if no fight within [ALI: e.g., 18-24 months]. A separate `cold_streak` form alert (4 straight losses) is shown as information, not as a data-quality flag.
 * **Consequences:** Users can see when a rating rests on thin or old evidence.
+
+## ADR 020: Strangler Migration - New `medallion.py` Beside Legacy `etl.py`
+* **Date:** 2026-11-15
+* **Status:** Accepted
+* **Context:** `OctagonDataEngine` (synthetic seed data) is imported by 10+ modules and tests. Deleting it in one step would break the whole suite.
+* **Decision:** Build the real-data warehouse as `UFCWarehouse` in new `src/engine/medallion.py`, fed by `src/engine/ingest.py`. Migrate consumers (`train`, `simulation`, `archetypes`, agent tools, `app.py`) one slice at a time, then delete the legacy class and fold `medallion.py` into `etl.py`.
+* **Consequences:** The suite stays green at every step. Two engines coexist briefly, which is a deliberate, temporary cost.
+* **Non-Technical Explanation:** "We built the new kitchen next to the old one and moved dishes over one at a time, instead of closing the restaurant."
+
+## ADR 021: Data-Quality Rules Found on Real Data
+* **Date:** 2026-11-15
+* **Status:** Accepted
+* **Decision:** (1) Bouts whose event has no upstream date stay in Silver but are excluded from Gold, because point-in-time features need a date (2 of 9,003 bouts today; guarded at <0.1%). (2) Fighters are name-keyed because upstream stats carry no fighter ID; duplicate names are flagged `name_collision` and their physical attributes are nulled, not guessed. (3) A missing control time (`--`) stays NULL, never 0. (4) Impossible rates (landed > attempted) are clamped to [0, 1].
+* **Consequences:** Honest gaps instead of silent guesses. `latest_weight_class` (not the most common class) should define a fighter's division population.
