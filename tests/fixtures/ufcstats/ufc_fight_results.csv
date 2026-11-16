@@ -1,0 +1,6 @@
+EVENT,BOUT,OUTCOME,WEIGHTCLASS,METHOD,ROUND,TIME,TIME FORMAT,REFEREE,DETAILS,URL
+UFC 300: Test A ,Alpha One vs. Bravo Two,W/L,Lightweight Bout,KO/TKO ,2,1:30,3 Rnd (5-5-5),Ref One,Punches,http://ufcstats.com/fight-details/aaa1
+UFC 300: Test A ,Delta Four vs. Charlie Three,L/W,Lightweight Bout,Decision - Unanimous ,3,5:00,3 Rnd (5-5-5),Ref One,29-28.29-28.30-27.,http://ufcstats.com/fight-details/bbb2
+UFC 301: Test B ,Alpha One vs. Charlie Three,W/L,UFC Lightweight Title Bout,Submission ,1,4:10,5 Rnd (5-5-5-5-5),Ref Two,Rear Naked Choke,http://ufcstats.com/fight-details/ccc3
+UFC 301: Test B ,Echo Five vs. Foxtrot Six,NC/NC,Women's Strawweight Bout,Overturned ,1,2:00,3 Rnd (5-5-5),Ref Two,,http://ufcstats.com/fight-details/ddd4
+UFC Fight Night: Test C ,Bravo Two vs. Delta Four,D/D,Lightweight Bout,Decision - Majority ,3,5:00,3 Rnd (5-5-5),Ref Three,28-28.29-27.28-28.,http://ufcstats.com/fight-details/eee5
