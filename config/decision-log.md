@@ -95,3 +95,41 @@
 * **Context:** Heavy multi-agent frameworks (LangGraph, CrewAI) introduce significant abstractions and dependency overhead.
 * **Decision:** Build a lightweight, explicit agent orchestration loop in Python using FastMCP and native SDK calls.
 * **Consequences:** Minimizes latency, keeps dependencies lean, and retains complete control over context and prompt assembly.
+
+## ADR 015: Real UFC Data via Public CSV Mirror (Replaces Synthetic Seed Data)
+* **Date:** 2026-11-15
+* **Status:** Accepted (risk knowingly accepted)
+* **Context:** Seed profiles and Gaussian training frames were circular: models learned our own formula. CageQuant's terms forbid scraping, and no UFC equivalent of FBRef or StatsBomb open data exists.
+* **Decision:** Ingest UFCStats-derived CSVs from `Greco1899/scrape_ufc_stats` weekly. Keep the project non-commercial and credit all sources (see LEGAL.md).
+* **Alternatives Considered:** Scraping CageQuant (ToS conflict), writing our own UFCStats scraper (same terms question, more maintenance), staying synthetic (circular).
+* **Consequences:** Real outcomes enable honest training. Dependency on one maintainer, so pin the commit, cache snapshots, and fail loudly on schema change. Legal gray area is documented, not ignored.
+* **Non-Technical Explanation:** "We switched from practicing against our own made-up answers to real fight results."
+
+## ADR 016: Medallion Architecture with Star Schema in DuckDB
+* **Date:** 2026-11-15
+* **Status:** Accepted
+* **Context:** Raw CSVs are messy (strikes stored as "20 of 47", times as "1:23") and ad-hoc cleaning is not auditable.
+* **Decision:** Bronze (verbatim weekly snapshots plus audit columns) -> Silver (typed, deduplicated, bout-level, shrunk rates) -> Gold (`dim_fighter`, `dim_bout`, `fact_bouts`, rating cards). Bout-first, then fighter-level views.
+* **Consequences:** Every number traces back to a raw row, and each layer is unit-testable. More tables to maintain.
+* **Non-Technical Explanation:** "Raw data is the delivery box, Silver is the cleaned shelf, Gold is the finished product on display."
+
+## ADR 017: Weekly Elastic-Net Refit with Versioned Models and a Promotion Gate
+* **Date:** 2026-11-15
+* **Status:** Proposed [ALI to confirm thresholds]
+* **Context:** New fights arrive weekly, so ratings must stay current without silently degrading.
+* **Decision:** Each Sunday, refit the L1+L2 (Elastic-Net) win model on all bouts. Train only on fights before a cutoff date and validate on later fights (out-of-time, never a random split). Save each fit as a version: coefficients, training data cutoff, metrics, git commit. Promote a new version only if it passes the gate; otherwise keep the previous one.
+* **Proposed gate [ALI]:** out-of-time log-loss and Brier score no worse than the current version beyond a small tolerance; coefficient signs pass sanity checks (e.g., a higher opponent-adjusted strike differential never lowers win odds).
+* **Consequences:** Ratings can drift week to week and every change is explainable and reversible. XGBoost remains the separate calibrated win-probability model (ADR 006).
+
+## ADR 018: PSY Is a Proxy Attribute
+* **Date:** 2026-11-15
+* **Status:** Accepted
+* **Context:** Psychology cannot be measured directly from fight statistics.
+* **Decision:** PSY v1 uses behavioral proxies only: bounce-back after a loss, sustained output when trailing after earlier rounds, results against strong opponents (opponent UFC win rate at fight time), loss durability (time lasted in losses), and opponent-weighted win/loss streaks. Always labeled "PSY (proxy)". We run an ablation (model with vs. without PSY) and report it. Fast-win time lives in ATT only, to avoid double counting.
+* **Consequences:** Honest and falsifiable. The auditor must never present PSY as measured fact. If the model assigns PSY near-zero weight, we report that finding.
+
+## ADR 019: Rating Eligibility & Confidence Flags
+* **Date:** 2026-11-15
+* **Status:** Proposed [ALI to confirm]
+* **Decision:** A fighter needs at least 7 UFC bouts for a full card; fewer gets a "provisional" card using Bayesian shrinkage. `stale` flag if no fight within [ALI: e.g., 18-24 months]. A separate `cold_streak` form alert (4 straight losses) is shown as information, not as a data-quality flag.
+* **Consequences:** Users can see when a rating rests on thin or old evidence.
