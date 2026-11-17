@@ -12,7 +12,7 @@ def run_evals():
     with open(dataset_path, "r") as f:
         scenarios = json.load(f)
 
-    copilot = DecisionCopilot(use_mock=True, tolerance_pct=0.5)
+    copilot = DecisionCopilot(use_mock=True)  # default tolerance = app_config.AUDIT_TOLERANCE_PCT
     passed = 0
 
     print(f"\n--- Executing {len(scenarios)} Golden Evaluation Scenarios ---")
@@ -38,7 +38,8 @@ def run_evals():
 
     pass_rate = (passed / len(scenarios)) * 100
     print(f"\nEvaluation Benchmark Result: {passed}/{len(scenarios)} passed ({pass_rate:.1f}%)")
-    assert pass_rate >= 90.0, f"Benchmark failed: pass rate {pass_rate}% below 90% threshold."
+    # The mock narrator is deterministic, so anything below 100% is a real regression.
+    assert passed == len(scenarios), f"Benchmark failed: {len(scenarios) - passed} scenario(s) regressed."
 
 if __name__ == "__main__":
     run_evals()

@@ -145,5 +145,45 @@
     "fighter_a": "Dustin Poirier",
     "fighter_b": "Justin Gaethje",
     "expected_status": "success"
+  },
+  {
+    "id": "EVAL-21",
+    "type": "adversarial_swapped_fighters",
+    "fighter_a": "Islam Makhachev",
+    "fighter_b": "Carlos Prates",
+    "expected_status": "refused",
+    "force_hallucination": "swapped"
+  },
+  {
+    "id": "EVAL-22",
+    "type": "adversarial_wrong_ci",
+    "fighter_a": "Islam Makhachev",
+    "fighter_b": "Carlos Prates",
+    "expected_status": "refused",
+    "force_hallucination": "bad_ci"
+  },
+  {
+    "id": "EVAL-23",
+    "type": "adversarial_fake_method",
+    "fighter_a": "Islam Makhachev",
+    "fighter_b": "Carlos Prates",
+    "expected_status": "refused",
+    "force_hallucination": "fake_method"
+  },
+  {
+    "id": "EVAL-24",
+    "type": "adversarial_unverifiable",
+    "fighter_a": "Islam Makhachev",
+    "fighter_b": "Carlos Prates",
+    "expected_status": "refused",
+    "force_hallucination": "no_claims"
+  },
+  {
+    "id": "EVAL-25",
+    "type": "adversarial_prose_lie",
+    "fighter_a": "Islam Makhachev",
+    "fighter_b": "Carlos Prates",
+    "expected_status": "refused",
+    "force_hallucination": "text_lie"
   }
 ]
