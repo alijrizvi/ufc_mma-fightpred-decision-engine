@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.agent.copilot import DecisionCopilot
+from src.engine.card_view import load_cards, render_card_html
 from src.engine.etl import DATA_PROVENANCE, OctagonDataEngine
 from src.engine.monte_carlo import MonteCarloRiskEngine
 from src.engine.simulation import OctagonSimulationEngine
@@ -186,6 +187,13 @@ else:
     ko_pct = finish_ratio * 0.65 * 100.0
     sub_pct = finish_ratio * 0.35 * 100.0
     dec_pct = (1.0 - finish_ratio) * 100.0
+
+# --- Fighter Rating Cards (Slice 3) ---
+_cards = load_cards()
+_card_a, _card_b = st.columns(2)
+for _slot, _name in ((_card_a, fighter_a), (_card_b, fighter_b)):
+    with _slot:
+        st.markdown(render_card_html(_cards.get(_name), name=_name), unsafe_allow_html=True)
 
 m1, m2, m3, m4, m5 = st.columns(5)
 m1.metric(f"{fighter_a} Win Prob", f"{win_rate_a:.1f}%")
