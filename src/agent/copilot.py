@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
+import json
 import os
+import re
 from typing import Any
 
 from anthropic import Anthropic
 
 from src.agent.auditor import AnalyticalAuditor
 from src.agent.harness import REFUSAL_PATTERN, AgentHarness
-from src.agent.schemas import CopilotAnalysisResult
+from src.agent.schemas import Claim, CopilotAnalysisResult, Narration
+from src.engine.app_config import AUDIT_TOLERANCE_PCT
 
 DEFAULT_MODEL = "claude-haiku-5-5"  # override with the ANTHROPIC_MODEL env var
 
@@ -17,7 +20,7 @@ DEFAULT_MODEL = "claude-haiku-5-5"  # override with the ANTHROPIC_MODEL env var
 class DecisionCopilot:
     REFUSAL_PATTERN = REFUSAL_PATTERN  # kept for backward compatibility
 
-    def __init__(self, tolerance_pct: float = 0.5, use_mock: bool = False, max_attempts: int = 2) -> None:
+    def __init__(self, tolerance_pct: float = AUDIT_TOLERANCE_PCT, use_mock: bool = False, max_attempts: int = 2) -> None:
         self.use_mock = use_mock
         self.tolerance_pct = tolerance_pct
         self.max_attempts = max_attempts
@@ -29,32 +32,55 @@ class DecisionCopilot:
     def _narrator(self, force_hallucination: bool):
         """Builds the narrator callable the harness will use (mock or real LLM)."""
 
-        def narrate(ground_truth: dict[str, Any], fighter_a: str, fighter_b: str, violations: list[str]) -> str:
+        def narrate(ground_truth: dict[str, Any], fighter_a: str, fighter_b: str, violations: list[str]) -> Narration:
             p_a = round(ground_truth["win_rate_a"] * 100, 1)
             p_b = round(ground_truth["win_rate_b"] * 100, 1)
+            n_sims = ground_truth.get("total_simulations", 1000)
 
             if self.use_mock or self.client is None:
                 if force_hallucination:
-                    return f"Tactical brief: {fighter_a} has an overwhelming 98.5% win rate over {fighter_b}."
-                return (
-                    f"Across {ground_truth.get('total_simulations', 1000):,} stochastic iterations, {fighter_a} registers a {p_a}% projected win rate, "
+                    # Always 15 points from the truth, so it can never hide inside the audit tolerance.
+                    fake = round(p_a + 15.0 if p_a <= 50.0 else p_a - 15.0, 1)
+                    return Narration(
+                        text=f"Tactical brief: {fighter_a} has a dominant {fake}% win rate over {fighter_b}.",
+                        claims=[Claim(type="win_prob", subject=fighter_a, value=fake)],
+                    )
+                text = (
+                    f"Across {n_sims:,} stochastic iterations, {fighter_a} registers a {p_a}% projected win rate, "
                     f"while {fighter_b} sits at {p_b}% with an average finish interval of "
                     f"{ground_truth['avg_finish_interval']}."
                 )
+                claims = [
+                    Claim(type="fighter", subject=fighter_a),
+                    Claim(type="fighter", subject=fighter_b),
+                    Claim(type="win_prob", subject=fighter_a, value=p_a),
+                    Claim(type="win_prob", subject=fighter_b, value=p_b),
+                    Claim(type="provenance", subject="n_simulations", value=n_sims),
+                ]
+                return Narration(text=text, claims=claims)
 
             prompt = (
-                f"Ground truth telemetry: {ground_truth}. Provide a 2-sentence tactical brief stating "
-                f"exact win rates ({p_a}% vs {p_b}%). Do not hallucinate or alter any numbers."
+                f"Ground truth telemetry: {ground_truth}. Write a 2-sentence tactical brief stating exact win "
+                f"rates ({p_a}% vs {p_b}%). Do not alter any numbers. Reply with ONLY JSON: "
+                '{"text": "<brief>", "claims": [{"type": "fighter|win_prob|method_share|ci|provenance", '
+                '"subject": "<fighter, method, or n_simulations>", "value": <percent or count>, '
+                '"lo": <percent>, "hi": <percent>}]} listing every number or name your text states.'
             )
             if violations:
                 prompt += f" Your previous draft failed an audit: {violations}. Use ONLY the numbers given."
             response = self.client.messages.create(
                 model=self.model_name,
-                max_tokens=200,
+                max_tokens=400,
                 temperature=0.0,
                 messages=[{"role": "user", "content": prompt}],
             )
-            return response.content[0].text
+            raw = response.content[0].text
+            try:
+                cleaned = re.sub(r"^```(?:json)?|```$", "", raw.strip(), flags=re.MULTILINE).strip()
+                return Narration.model_validate(json.loads(cleaned))
+            except (ValueError, TypeError):
+                # Unparseable output has no checkable claims, so the audit fails and the harness retries.
+                return Narration(text=raw, claims=[])
 
         return narrate
 

@@ -1,12 +1,13 @@
 from src.agent.auditor import AnalyticalAuditor
 from src.agent.copilot import AgenticCopilot
-from src.agent.tools import query_semantic_metric, run_stochastic_simulation
+from src.agent.tools import get_semantic_layer, query_semantic_metric, run_stochastic_simulation
 
 
 def test_fastmcp_tools_return_structured_dict():
     """Enforces that FastMCP analytical tools return structured ground-truth dictionaries."""
-    metric_res = query_semantic_metric("Islam Makhachev", "punch_power")
-    assert metric_res["fighter_name"] == "Islam Makhachev"
+    fighter = get_semantic_layer().fighters()[0]
+    metric_res = query_semantic_metric(fighter, "ATT")
+    assert metric_res["fighter_name"] == fighter
     assert "value" in metric_res
 
     sim_res = run_stochastic_simulation("Islam Makhachev", "Carlos Prates", num_simulations=50)

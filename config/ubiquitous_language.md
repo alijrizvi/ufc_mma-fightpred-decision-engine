@@ -17,3 +17,7 @@
 * **Promotion Gate:** The automatic check a new weekly fit must pass before replacing the current version.
 * **Bayesian Shrinkage:** Pulling a thin-sample estimate toward the division average, weighted by cage minutes.
 * **Medallion Layers:** Bronze (raw), Silver (cleaned), Gold (analysis-ready star schema).
+* **Semantic Layer:** The governed registry (`config/metrics.yml`) of metric names and where each lives on the cards.
+* **Claim:** One checkable statement from the narrator (fighter, win probability, method share, CI, provenance).
+* **Narration:** The narrator's output: prose for humans plus its list of Claims for the auditor.
+* **Wilson Interval:** A 95% confidence interval for a proportion such as a simulated win rate.

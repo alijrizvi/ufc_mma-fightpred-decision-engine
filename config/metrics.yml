@@ -1,26 +1,38 @@
-version: 1
-cubes:
-  - name: interval_telemetry
-    sql: "SELECT * FROM interval_telemetry"
-    
-    measures:
-      - name: strike_hit_pct
-        sql: "SUM(strikes_landed) * 1.0 / NULLIF(SUM(strikes_attempted), 0)"
-        type: number
-
-      - name: avg_damage_per_strike
-        sql: "SUM(damage_dealt) * 1.0 / NULLIF(SUM(strikes_landed), 0)"
-        type: number
-
-      - name: takedown_def_pct
-        sql: "1.0 - (SUM(opponent_td_landed) * 1.0 / NULLIF(SUM(opponent_td_attempted), 0))"
-        type: number
-
-      - name: grapple_win_pct
-        sql: "SUM(grapple_positions_won) * 1.0 / NULLIF(SUM(grapple_exchanges), 0)"
-        type: number
-
-    dimensions:
-      - name: fighter_name
-        sql: fighter_name
-        type: string
+# Governed semantic layer (ADR 024). Registry over artifacts/cards/cards.json ONLY.
+# Every metric must name a real card field, a description, and a believable range.
+version: 2
+metrics:
+  ATT:
+    field: ATT
+    description: "Attack rating (striking offense), 0-100 scale."
+    min: 0
+    max: 100
+  DEF:
+    field: DEF
+    description: "Defense rating (damage avoidance), 0-100 scale."
+    min: 0
+    max: 100
+  WRE:
+    field: WRE
+    description: "Wrestling rating (takedowns and control), 0-100 scale."
+    min: 0
+    max: 100
+  SUB:
+    field: SUB
+    description: "Submission rating (offense and defense), 0-100 scale."
+    min: 0
+    max: 100
+  STA:
+    field: STA
+    description: "Stamina rating (output held across rounds), 0-100 scale."
+    min: 0
+    max: 100
+  PSY:
+    field: PSY
+    description: "Psychology rating (composure and fight IQ), 0-100 scale."
+    min: 0
+    max: 100
+  ufc_bouts:
+    field: ufc_bouts
+    description: "Number of UFC bouts on record."
+    min: 0

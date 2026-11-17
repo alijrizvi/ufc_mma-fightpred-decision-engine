@@ -11,11 +11,11 @@ mcp = FastMCP("CageQuant Decision Server")
 
 @mcp.tool()
 def query_semantic_metric(fighter_name: str, metric_name: str) -> Dict[str, Any]:
-    """Query one governed fighter metric from DuckDB.
+    """Query one governed fighter metric from the published cards.
 
     Args:
-        fighter_name: Fighter name as stored in DuckDB.
-        metric_name: Profile metric key (e.g. "punch_power").
+        fighter_name: Fighter name as published on the cards.
+        metric_name: Metric key from config/metrics.yml (e.g. "ATT").
 
     Returns:
         The metric payload, or {"status": "error", "error": "..."} on failure.
