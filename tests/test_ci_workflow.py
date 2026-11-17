@@ -1,4 +1,7 @@
-import pathlib, yaml
+import pathlib
+
+import yaml
+
 
 def test_ci_workflow():
     p = pathlib.Path(".github/workflows/ci.yml")

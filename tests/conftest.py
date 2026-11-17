@@ -1,4 +1,7 @@
-import pathlib, pytest
+import pathlib
+
+import pytest
+
 
 @pytest.fixture
 def fixture_raw():

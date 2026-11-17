@@ -1,4 +1,5 @@
 from streamlit.testing.v1 import AppTest
+
 from src.engine import pipeline
 
 FIGHTERS = ["Makhachev", "Poirier", "Gaethje", "Prates",

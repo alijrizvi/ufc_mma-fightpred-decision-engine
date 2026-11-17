@@ -1,7 +1,9 @@
+from typing import Any, Dict
+
 import duckdb
 import numpy as np
 import pandas as pd
-from typing import Any, Dict
+
 from src.engine.stats import FighterCombatProfile
 
 DATA_PROVENANCE = "synthetic"  # shown in the UI: outcomes are simulated, not real bouts

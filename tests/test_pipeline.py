@@ -1,6 +1,10 @@
-import hashlib, pathlib
+import hashlib
+import pathlib
+
 import pytest
+
 from src.engine import pipeline
+
 
 def _hash(d):
     return {p.name: hashlib.sha256(p.read_bytes()).hexdigest()
