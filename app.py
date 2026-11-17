@@ -6,6 +6,14 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src.agent.copilot import DecisionCopilot
+from src.engine.app_config import (
+    DEFAULT_SIMS,
+    DEFAULT_SPEED,
+    MAX_SIMS,
+    MIN_SIMS,
+    SIM_STEP,
+    SPEED_DELAYS,
+)
 from src.engine.card_view import load_cards, render_card_html
 from src.engine.etl import DATA_PROVENANCE, OctagonDataEngine
 from src.engine.monte_carlo import MonteCarloRiskEngine
@@ -110,7 +118,8 @@ with st.sidebar:
 
     max_rounds = st.slider("Scheduled Rounds", min_value=1, max_value=5, value=5, step=1)
     num_simulations = st.slider(
-        "Monte Carlo Simulations (N)", min_value=50, max_value=500, value=250, step=50
+        "Monte Carlo Simulations (N)",
+        min_value=MIN_SIMS, max_value=MAX_SIMS, value=DEFAULT_SIMS, step=SIM_STEP,
     )
     max_exchanges = st.slider(
         "Max Combat Exchanges (10s Steps)",
@@ -125,17 +134,11 @@ with st.sidebar:
     live_playback = st.toggle("Enable Live Accumulation Playback", value=True)
     speed_label = st.select_slider(
         "Playback Speed",
-        options=["0.5x (Slow-Mo)", "1x (Tactical)", "2x (Fast)", "5x (Turbo)"],
-        value="2x (Fast)",
+        options=list(SPEED_DELAYS),
+        value=DEFAULT_SPEED,
         disabled=not live_playback,
     )
-    speed_map = {
-        "0.5x (Slow-Mo)": 0.22,
-        "1x (Tactical)": 0.12,
-        "2x (Fast)": 0.05,
-        "5x (Turbo)": 0.02,
-    }
-    playback_delay = speed_map[speed_label]
+    playback_delay = SPEED_DELAYS[speed_label]
 
     st.button("▶️ Replay / Resimulate Bout", type="primary", use_container_width=True)
 
