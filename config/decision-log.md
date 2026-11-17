@@ -147,3 +147,20 @@
 * **Status:** Accepted
 * **Decision:** (1) Bouts whose event has no upstream date stay in Silver but are excluded from Gold, because point-in-time features need a date (2 of 9,003 bouts today; guarded at <0.1%). (2) Fighters are name-keyed because upstream stats carry no fighter ID; duplicate names are flagged `name_collision` and their physical attributes are nulled, not guessed. (3) A missing control time (`--`) stays NULL, never 0. (4) Impossible rates (landed > attempted) are clamped to [0, 1].
 * **Consequences:** Honest gaps instead of silent guesses. `latest_weight_class` (not the most common class) should define a fighter's division population.
+
+## ADR 022: Latency Budget - Monte Carlo Capped at 200, Playback Defaults to Medium (0.2s)
+* **Date:** 2026-11-16
+* **Status:** Accepted
+* **Context:** The live replay re-runs the simulation on every interaction. The old slider allowed up to 500 sims (default 250), and the PRD target was N=1,000. A replay that makes the user wait is a replay nobody uses.
+* **Alternatives Considered:** Keep 500; cache simulations per matchup; run N=1,000 in a background job.
+* **Decision:** Cap the UI at N=200 (default 100, steps of 50). Playback options are Slow 0.4s, Medium 0.2s (default), Fast 0.1s, Turbo 0.03s. All limits live in `src/engine/app_config.py` and are pinned by tests.
+* **Consequences:** Win-probability estimates are noisier (standard error is about 3.5 points at N=200 for p=0.5). The UI must show N and avoid false precision. The PRD's N=1,000 remains the offline/eval target.
+* **Non-Technical Explanation:** "We chose a quick, good-enough estimate that arrives while you are still watching, instead of a perfect one that makes you wait."
+
+## ADR 023: Publish-Last Weekly Pipeline with Injected Clock
+* **Date:** 2026-11-16
+* **Status:** Accepted
+* **Context:** The weekly refresh must be safe to re-run and must never show half-finished or worse ratings.
+* **Decision:** `pipeline.run_weekly` does all heavy work first (ingest, medallion, features, train), asks the champion/challenger gate, and only then writes `cards.json` and `metrics.json` atomically (temp file plus `os.replace`). The date is injected (`--as-of`, `created_at`, `version_id=v<date>`), so the same inputs give byte-identical outputs. Pipeline tests stub only the ML fit because the fixture has 3 decided bouts; the model itself is covered by Slice 2 tests and the real-data tests.
+* **Consequences:** A crash or a gate hold leaves last week's cards untouched. The fixture cannot validate model quality, which is a known limit.
+* **Non-Technical Explanation:** "We bake in the back kitchen and only move bread to the shelf when it is done, so customers never see half-baked cards."
