@@ -7,6 +7,7 @@ import streamlit as st
 
 from src.agent.copilot import DecisionCopilot
 from src.engine.app_config import (
+    AUDIT_TOLERANCE_PCT,
     DEFAULT_SIMS,
     DEFAULT_SPEED,
     MAX_SIMS,
@@ -386,7 +387,7 @@ with st.popover("🤖", help="Chat with CageBot — Your Personal Simulator Assi
                     f"Here's what the simulation data shows for **{fighter_a} vs. {fighter_b}**:\n\n"
                     f"{result.narrative}"
                 )
-                st.caption("✅ *Verified against Monte Carlo & DuckDB ground-truth receipt (±1.5% tolerance).*")
+                st.caption(f"✅ *Verified against Monte Carlo & DuckDB ground-truth receipt (±{AUDIT_TOLERANCE_PCT}% tolerance).*")
             else:
                 st.error(f"🛑 Hold on—my Receipt Auditor flagged an issue ({result.status.upper()}):")
                 st.markdown(result.narrative)

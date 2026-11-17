@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from src.agent.auditor import AnalyticalAuditor
-from src.agent.schemas import CopilotAnalysisResult
+from src.agent.schemas import CopilotAnalysisResult, Narration
 from src.agent.tools import run_stochastic_simulation
 
 REFUSAL_PATTERN = re.compile(
@@ -24,8 +24,9 @@ REFUSAL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-# narrator(ground_truth, fighter_a, fighter_b, prior_violations) -> draft text
-Narrator = Callable[[dict[str, Any], str, str, list[str]], str]
+# narrator(ground_truth, fighter_a, fighter_b, prior_violations) -> Narration (a bare str is still accepted:
+# it gets the prose audit only, with no structured claims to check)
+Narrator = Callable[[dict[str, Any], str, str, list[str]], Narration | str]
 
 
 @dataclass(frozen=True)
@@ -111,12 +112,16 @@ class AgentHarness:
                     attempts=attempt,
                     trace=trace,
                 )
-            is_valid, violations = self.auditor.verify_claims(draft, ground_truth)
+            text = draft.text if isinstance(draft, Narration) else draft
+            is_valid, violations = self.auditor.verify_claims(text, ground_truth)
+            if isinstance(draft, Narration):
+                claims_ok, claim_violations = self.auditor.verify_structured(draft.claims, ground_truth)
+                is_valid, violations = is_valid and claims_ok, violations + claim_violations
             trace.append(f"AUDIT #{attempt}: {'pass' if is_valid else f'fail ({len(violations)} violation(s))'}")
             if is_valid:
                 return CopilotAnalysisResult(
                     status="success",
-                    narrative=draft,
+                    narrative=text,
                     ground_truth=ground_truth,
                     attempts=attempt,
                     trace=trace,

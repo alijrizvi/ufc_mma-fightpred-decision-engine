@@ -9,3 +9,6 @@ SIM_STEP = 50
 # seconds between animation frames
 SPEED_DELAYS = {"Slow": 0.4, "Medium": 0.2, "Fast": 0.1, "Turbo": 0.03}
 DEFAULT_SPEED = "Medium"
+
+# One audit tolerance for the whole system (percentage points); auditor, copilot and UI read this.
+AUDIT_TOLERANCE_PCT = 1.5
