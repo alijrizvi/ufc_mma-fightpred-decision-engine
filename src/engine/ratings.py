@@ -280,7 +280,7 @@ def build_cards(
 # ---------------------------------------------------------------- orchestration
 def run_training(
     counts: pd.DataFrame, cutoff: date, train_start: date = DEFAULT_TRAIN_START,
-    l1_ratio: float = 0.5, version_id: Optional[str] = None,
+    l1_ratio: float = 0.5, version_id: Optional[str] = None, created_at: Optional[str] = None,
 ) -> Tuple[ModelVersion, pd.DataFrame, pd.DataFrame]:
     """Fit on bouts in [train_start, cutoff], validate on bouts after cutoff.
 
@@ -293,7 +293,7 @@ def run_training(
     train, valid = split_out_of_time(window, cutoff)
     model = fit_elastic_net(train, list(FEATURES), l1_ratio=l1_ratio)
     metrics = {**evaluate(model, valid), "train_n": int(len(train))}
-    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%S")
+    stamp = created_at or datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%S")
     version = ModelVersion(
         version_id=version_id or stamp, created_at=stamp, train_cutoff=str(cutoff),
         metrics=metrics, model=model, priors=priors.to_dict("records"),
