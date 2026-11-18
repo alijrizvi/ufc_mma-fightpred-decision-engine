@@ -190,6 +190,12 @@ Each step follows **Red → Green → Refactor**: write the failing test, make i
 
 ## 9. Standing on Giants' Shoulders
 
+Basically, this is one of the major portfolio projects symbolizing my career progression into a modern _**AI Data Scientist**_
+with expertise in **AI/LLM Engineering** and **MLOps**, oriented around Agentic Analytics, on top of the core **Data Science** 
+and **Machine Learning** stack.
+
+> i.e., to _10x Data Science_ and beyond!
+
 | Who | What I borrowed |
 |---|---|
 | **Andres Vourakis** | Agentic Analytics-oriented evolution; stakeholder-first data science, and portfolio storytelling |
@@ -199,10 +205,6 @@ Each step follows **Red → Green → Refactor**: write the failing test, make i
 | **Cassie Kozyrkov** | Decision intelligence: frame the decision before the model |
 | **Sebastian Raschka & Andrej Karpathy** | First-principles understanding of models (AI/LLMs) |
 | **Demetrios Brinkmann & Ayush Singh (MLOps Community)** | Real-world deployment and testing culture |
-
-Basically, this is one of the major portfolio projects symbolizing my career progression into a modern **AI Data Scientist**
-with expertise in AI/LLM Engineering and MLOps, oriented around Agentic Analytics, on top of the core **Data Science** 
-and **Machine Learning** stack.
 
 ---
 
