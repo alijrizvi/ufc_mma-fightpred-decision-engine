@@ -24,7 +24,7 @@ from src.engine.semantic import SemanticLayer
 from src.engine.simulation import OctagonSimulationEngine
 
 st.set_page_config(
-    page_title="CageQuant | UFC Decision Intelligence Engine",
+    page_title="UFC Decision Intelligence Engine",
     page_icon="🥋",
     layout="wide",
 )
