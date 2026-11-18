@@ -9,6 +9,7 @@
 **[▶ Live demo](https://ufc-mma-cagequant-fightpred-decision-engine.streamlit.app/)** · FIFA-style fighter rating cards, a Monte Carlo fight simulator, and an AI copilot whose every number is audited before you see it.
 
 > **Production-Oriented** project - not a full-scale intelligent AI data/ML system.
+
 > **Educational project, not betting advice.** See [LEGAL.md](LEGAL.md).
 
 ---
@@ -191,13 +192,17 @@ Each step follows **Red → Green → Refactor**: write the failing test, make i
 
 | Who | What I borrowed |
 |---|---|
-| **Andres Vourakis** | Project-based, stakeholder-first data science and portfolio storytelling |
-| **Matt Dancho** | Business-driven data science: translate models into ROI and decisions |
-| **Matt Pocock** | AI-coding workflow: shared alignment ("grill me"), deep modules, tracer-bullet slices, TDD |
+| **Andres Vourakis** | Agentic Analytics-oriented evolution; stakeholder-first data science, and portfolio storytelling |
+| **Matt Dancho** | Moving towards building intelligent multi-agentic AI data systems; business-driven data science: translate models into ROI and decisions |
+| **Matt Pocock** | AI-coding workflow
 | **Chip Huyen & Goku Mohandas** | Production ML: data contracts, monitoring, CI/CD |
 | **Cassie Kozyrkov** | Decision intelligence: frame the decision before the model |
-| **Sebastian Raschka & Andrej Karpathy** | First-principles understanding of models |
-| **Demetrios Brinkmann (MLOps Community)** | Real-world deployment and testing culture |
+| **Sebastian Raschka & Andrej Karpathy** | First-principles understanding of models (AI/LLMs) |
+| **Demetrios Brinkmann & Ayush Singh (MLOps Community)** | Real-world deployment and testing culture |
+
+Basically, this is one of the major portfolio projects symbolizing my career progression into a modern **AI Data Scientist**
+with expertise in AI/LLM Engineering and MLOps, oriented around Agentic Analytics, on top of the core **Data Science** 
+and **Machine Learning** stack.
 
 ---
 
