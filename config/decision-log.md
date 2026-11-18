@@ -180,3 +180,11 @@
 * **Decision:** Narrators return `Narration(text, claims)`. `AnalyticalAuditor.verify_structured` checks each `Claim` (fighter identity, win probability, method share, CI, provenance) against ground truth; the prose is still scanned for stray percentages. One constant, `AUDIT_TOLERANCE_PCT = 1.5`, is shared by auditor, copilot and UI. Simulation results carry 95% Wilson intervals (`src/engine/intervals.py`).
 * **Consequences:** Swapped fighters and invented methods are caught, which regex alone could not. A bare-string narrator is still accepted (prose audit only). Empty claims are refused as unverifiable. At N=200 a 1.5 point tolerance is valid only because the auditor compares against the same simulation output.
 * **Non-Technical Explanation:** "The writer hands in an itemized receipt, and the inspector checks every line against the till."
+
+## ADR 026: Cards Drive the Simulator Through One Governed Bridge
+* **Date:** 2026-11-17
+* **Status:** Accepted
+* **Context:** The agent's ground truth and the Streamlit simulator still ran on a hand-seeded 6-fighter table (ADR 020 strangler), so win probabilities ignored the published ATT/DEF/WRE/SUB/STA/PSY ratings.
+* **Decision:** `src/engine/profiles.py` maps each rating (65-99) linearly to the simulator's 12 combat parameters (endpoints are modelling assumptions), reading every value through `SemanticLayer`. `tools.run_stochastic_simulation` and `app.py` both use it; the app roster is the 8-fighter `SHOWCASE_ROSTER`. The weekly pipeline gains `--fetch`, a card integrity gate (empty, duplicates, NaN, out-of-range, roster shrink over 20%) that fails loudly, and a rating-shift report in `metrics.json`. A scheduled workflow (`weekly.yml`) refreshes and commits the cards.
+* **Consequences:** Win probabilities now respond to the ratings. Ratings are percentiles within a division, so cross-division matchups are approximations. The interval predictor behind the animated replay is still trained on legacy seeded telemetry (next migration step). The weekly bot pushes to main, so branch protection must allow it.
+* **Non-Technical Explanation:** "The fight simulator now reads the same report cards we publish, instead of an old hand-written cheat sheet."

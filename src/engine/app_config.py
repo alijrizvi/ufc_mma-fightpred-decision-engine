@@ -12,3 +12,9 @@ DEFAULT_SPEED = "Medium"
 
 # One audit tolerance for the whole system (percentage points); auditor, copilot and UI read this.
 AUDIT_TOLERANCE_PCT = 1.5
+
+# The 8 live lightweights shown in the simulator (chosen by interest, not by a weight-class rule).
+SHOWCASE_ROSTER = (
+    "Islam Makhachev", "Ilia Topuria", "Arman Tsarukyan", "Charles Oliveira",
+    "Max Holloway", "Dustin Poirier", "Justin Gaethje", "Carlos Prates",
+)

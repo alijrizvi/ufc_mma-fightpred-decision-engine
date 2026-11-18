@@ -12,12 +12,15 @@ from src.engine.app_config import (
     DEFAULT_SPEED,
     MAX_SIMS,
     MIN_SIMS,
+    SHOWCASE_ROSTER,
     SIM_STEP,
     SPEED_DELAYS,
 )
 from src.engine.card_view import load_cards, render_card_html
 from src.engine.etl import DATA_PROVENANCE, OctagonDataEngine
 from src.engine.monte_carlo import MonteCarloRiskEngine
+from src.engine.profiles import profile_from_layer, stance_label
+from src.engine.semantic import SemanticLayer
 from src.engine.simulation import OctagonSimulationEngine
 
 st.set_page_config(
@@ -87,12 +90,20 @@ def get_warehouse(_version: str = "v9_running_total_area") -> OctagonDataEngine:
     return engine
 
 
-warehouse = get_warehouse()
-roster_df = warehouse.conn.execute(
-    "SELECT fighter_name, weight_class, stance FROM gold.dim_fighter ORDER BY fighter_name"
-).fetchdf()
-FIGHTER_NAMES = roster_df["fighter_name"].tolist()
-ARCHETYPE_MAP = dict(zip(roster_df["fighter_name"], roster_df["stance"]))
+warehouse = get_warehouse()  # still feeds the interval predictor; fighters themselves come from the cards
+
+
+@st.cache_resource
+def get_layer() -> SemanticLayer:
+    return SemanticLayer.from_defaults()
+
+
+layer = get_layer()
+FIGHTER_NAMES = [f for f in SHOWCASE_ROSTER if f in set(layer.fighters())]
+if len(FIGHTER_NAMES) < 2:
+    st.error("Published cards are missing the showcase roster. Run the weekly pipeline first.")
+    st.stop()
+ARCHETYPE_MAP = {f: stance_label(profile_from_layer(layer, f)) for f in FIGHTER_NAMES}
 
 # --- HEADER ---
 provenance_label = getattr(warehouse, "provenance", DATA_PROVENANCE).upper()
@@ -144,8 +155,8 @@ with st.sidebar:
     st.button("▶️ Replay / Resimulate Bout", type="primary", use_container_width=True)
 
 # --- LOAD FIGHTER PROFILES ---
-prof_a = warehouse.load_fighter_profile(fighter_a)
-prof_b = warehouse.load_fighter_profile(fighter_b)
+prof_a = profile_from_layer(layer, fighter_a)
+prof_b = profile_from_layer(layer, fighter_b)
 
 # --- RUN SIMULATION & MONTE CARLO ---
 sim_engine = OctagonSimulationEngine(db_engine=warehouse)
