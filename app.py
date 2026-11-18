@@ -29,35 +29,62 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- FLOATING ROBOT CHATBOT STYLING ---
+# --- FLOATING ROBOT CHATBOT & SLEEK FIGHTER CARD STYLING ---
 st.markdown(
     """
     <style>
-    /* Anchor the floating robot popover button in the bottom-right corner */
+    /* Anchor the floating robot head button in the medial top-right viewport */
     div[data-testid="stPopover"] {
         position: fixed;
-        bottom: 28px;
-        right: 28px;
+        top: 82px;
+        right: 34px;
         z-index: 9999;
     }
     div[data-testid="stPopover"] > button {
-        width: 64px;
-        height: 64px;
+        width: 58px;
+        height: 58px;
         border-radius: 50%;
-        font-size: 30px;
-        background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
-        color: white;
-        border: 2px solid #fca5a5;
-        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.45);
+        font-size: 28px;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: #38bdf8;
+        border: 2px solid #38bdf8;
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     div[data-testid="stPopover"] > button:hover {
         transform: scale(1.08);
-        box-shadow: 0 12px 30px rgba(239, 68, 68, 0.65);
+        box-shadow: 0 10px 28px rgba(56, 189, 248, 0.6);
     }
-    /* Hide the default downward caret icon inside the circular robot button */
+    /* Hide the default downward caret icon inside the circular robot head button */
     div[data-testid="stPopover"] > button svg {
         display: none;
+    }
+
+    /* Sleek, slim, corner-colored fighter card containers */
+    .fighter-card-shell {
+        max-width: 380px;
+        margin: 0 auto 22px auto;
+        padding: 10px 14px;
+        border-radius: 12px;
+        transition: transform 0.15s ease;
+    }
+    .fighter-card-red {
+        background: linear-gradient(145deg, rgba(127, 29, 29, 0.55) 0%, rgba(30, 15, 20, 0.85) 100%);
+        border: 1px solid rgba(248, 113, 113, 0.45);
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
+    }
+    .fighter-card-blue {
+        background: linear-gradient(145deg, rgba(30, 58, 138, 0.55) 0%, rgba(15, 23, 42, 0.85) 100%);
+        border: 1px solid rgba(96, 165, 250, 0.45);
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+    }
+    /* Keep inner card content compact and prevent full-width stretching */
+    .fighter-card-shell > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        background: transparent !important;
+        padding: 4px 6px !important;
+        margin: 0 !important;
     }
     </style>
     """,
@@ -127,10 +154,13 @@ with st.sidebar:
     max_rounds = st.slider("Scheduled Rounds", min_value=1, max_value=5, value=5, step=1)
     num_simulations = st.slider(
         "Monte Carlo Simulations (N)",
-        min_value=MIN_SIMS, max_value=MAX_SIMS, value=DEFAULT_SIMS, step=SIM_STEP,
+        min_value=MIN_SIMS,
+        max_value=MAX_SIMS,
+        value=DEFAULT_SIMS,
+        step=SIM_STEP,
     )
-    max_exchanges = st.slider(
-        "Max Combat Exchanges (10s Steps)",
+    telemetry_horizon = st.slider(
+        "Telemetry Horizon (10-Sec Intervals)",
         min_value=30,
         max_value=150,
         value=max_rounds * 30,
@@ -161,7 +191,7 @@ single_bout = sim_engine.run_full_fight(prof_a, prof_b, max_rounds=max_rounds, s
 mc_engine = MonteCarloRiskEngine(num_simulations=num_simulations)
 mc_summary = mc_engine.run_bout_simulation(prof_a, prof_b, max_rounds=max_rounds)
 
-logs_df = pd.DataFrame([vars(log) for log in single_bout.interval_logs]).head(max_exchanges).copy()
+logs_df = pd.DataFrame([vars(log) for log in single_bout.interval_logs]).head(telemetry_horizon).copy()
 
 # Compute monotonically ascending running total damage dealt per fighter
 if not logs_df.empty:
@@ -199,19 +229,29 @@ else:
     sub_pct = finish_ratio * 0.35 * 100.0
     dec_pct = (1.0 - finish_ratio) * 100.0
 
-# --- Fighter Rating Cards (Slice 3) ---
+# --- SLEEK, SLIM CORNER-COLORED FIGHTER CARDS ---
 _cards = load_cards()
 _card_a, _card_b = st.columns(2)
-for _slot, _name in ((_card_a, fighter_a), (_card_b, fighter_b)):
+for _slot, _name, _corner_cls in (
+    (_card_a, fighter_a, "fighter-card-red"),
+    (_card_b, fighter_b, "fighter-card-blue"),
+):
     with _slot:
-        st.markdown(render_card_html(_cards.get(_name), name=_name), unsafe_allow_html=True)
+        raw_card_html = render_card_html(_cards.get(_name), name=_name)
+        st.markdown(
+            f'<div class="fighter-card-shell {_corner_cls}">{raw_card_html}</div>',
+            unsafe_allow_html=True,
+        )
+
+# Explicit vertical breathing room between fighter cards and KPI metrics below
+st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
 m1, m2, m3, m4, m5 = st.columns(5)
-m1.metric(f"\n{fighter_a} Win Prob", f"{win_rate_a:.1f}%")
-m2.metric(f"\n{fighter_b} Win Prob", f"{win_rate_b:.1f}%")
-m3.metric("\nKO / TKO Finish Prob", f"{ko_pct:.1f}%")
-m4.metric("\nSubmission Prob", f"{sub_pct:.1f}%")
-m5.metric("\nDecision / Avg End", f"{dec_pct:.1f}% • Exchange {mc_summary.avg_finish_interval:.0f}")
+m1.metric(f"{fighter_a} Win Prob", f"{win_rate_a:.1f}%")
+m2.metric(f"{fighter_b} Win Prob", f"{win_rate_b:.1f}%")
+m3.metric("KO / TKO Finish Prob", f"{ko_pct:.1f}%")
+m4.metric("Submission Prob", f"{sub_pct:.1f}%")
+m5.metric("Decision / Avg End", f"{dec_pct:.1f}% • Int {mc_summary.avg_finish_interval:.0f}")
 
 bout_winner = getattr(single_bout, "winner", "Draw")
 bout_method = (
@@ -257,7 +297,7 @@ def build_figures(
     )
     fig_prob.update_layout(
         title="1. Live Win Probability Trajectory (%)",
-        xaxis_title="10-Sec Combat Exchange",
+        xaxis_title="10-Sec Telemetry Interval",
         yaxis_title="Win Probability (%)",
         xaxis=dict(range=[1, x_max]),
         yaxis=dict(range=[0, 100]),
@@ -293,7 +333,7 @@ def build_figures(
     )
     fig_area.update_layout(
         title="2. Total Fight Output",
-        xaxis_title="10-Sec Combat Exchange",
+        xaxis_title="10-Sec Telemetry Interval",
         yaxis_title="Cumulative Damage Dealt",
         xaxis=dict(range=[1, x_max]),
         yaxis=dict(range=[0, max(100.0, max_total_dmg * 1.1)]),
@@ -324,20 +364,20 @@ if not logs_df.empty:
 
         for frame_idx, end_idx in enumerate(frame_indices):
             df_slice = logs_df.iloc[:end_idx]
-            curr_ex = int(df_slice["interval_id"].iloc[-1])
-            curr_rd = ((curr_ex - 1) // 30) + 1
+            curr_int = int(df_slice["interval_id"].iloc[-1])
+            curr_rd = ((curr_int - 1) // 30) + 1
             clock_slot.caption(
-                f"⏱️ **Live Octagon Clock:** Round {curr_rd} • Exchange {curr_ex} / {total_steps}"
+                f"⏱️ **Live Octagon Clock:** Round {curr_rd} • Interval {curr_int} / {total_steps}"
             )
             fig_prob, fig_area = build_figures(df_slice, total_steps, max_combined_dmg)
             slot_prob.plotly_chart(fig_prob, use_container_width=True, key=f"prob_live_{frame_idx}")
             slot_area.plotly_chart(fig_area, use_container_width=True, key=f"area_live_{frame_idx}")
             time.sleep(playback_delay)
     else:
-        curr_ex = int(logs_df["interval_id"].iloc[-1])
-        curr_rd = ((curr_ex - 1) // 30) + 1
+        curr_int = int(logs_df["interval_id"].iloc[-1])
+        curr_rd = ((curr_int - 1) // 30) + 1
         clock_slot.caption(
-            f"⏱️ **Final Octagon Clock:** Round {curr_rd} • Exchange {curr_ex} / {total_steps}"
+            f"⏱️ **Final Octagon Clock:** Round {curr_rd} • Interval {curr_int} / {total_steps}"
         )
         fig_prob, fig_area = build_figures(logs_df, total_steps, max_combined_dmg)
         slot_prob.plotly_chart(fig_prob, use_container_width=True, key="prob_static")
@@ -345,7 +385,7 @@ if not logs_df.empty:
 
 
 # ==============================================================================
-# FLOATING PERSONAL SIMULATOR ASSISTANT: "CAGEBOT"
+# FLOATING PERSONAL SIMULATOR ASSISTANT: "CAGEBOT" (MEDIAL TOP-RIGHT)
 # ==============================================================================
 with st.popover("🤖", help="Chat with CageBot — Your Personal Simulator Assistant"):
     st.markdown("### 🤖 CageBot • Simulator Assistant")
@@ -394,7 +434,9 @@ with st.popover("🤖", help="Chat with CageBot — Your Personal Simulator Assi
                     f"Here's what the simulation data shows for **{fighter_a} vs. {fighter_b}**:\n\n"
                     f"{result.narrative}"
                 )
-                st.caption(f"✅ *Verified against Monte Carlo & DuckDB ground-truth receipt (±{AUDIT_TOLERANCE_PCT}% tolerance).*")
+                st.caption(
+                    f"✅ *Verified against Monte Carlo & DuckDB ground-truth receipt (±{AUDIT_TOLERANCE_PCT}% tolerance).*"
+                )
             else:
                 st.error(f"🛑 Hold on—my Receipt Auditor flagged an issue ({result.status.upper()}):")
                 st.markdown(result.narrative)
