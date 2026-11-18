@@ -188,7 +188,7 @@ Each step follows **Red → Green → Refactor**: write the failing test, make i
 
 ---
 
-## 9. Standing on Giants' Shoulders
+## 9. Why Take Inspiration: Standing on Giants' Shoulders
 
 Basically, this is one of the major portfolio projects symbolizing my career progression into a modern _**AI Data Scientist**_
 with expertise in **AI/LLM Engineering** and **MLOps**, oriented around Agentic Analytics, on top of the core **Data Science** 
