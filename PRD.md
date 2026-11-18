@@ -9,6 +9,7 @@ CageQuant is an enterprise-grade Decision Intelligence Engine designed for UFC L
 * **FR-03 (Calibrated Predictive Modeling):** Predict dynamic win probabilities per interval using `xgboost.XGBClassifier`, evaluated via Brier Skill Score ($BSS > 0.0$) against empirical base rates.
 * **FR-04 (Unsupervised Archetypes):** Cluster fighters into 4 tactical styles using PCA and K-Means, and retrieve historical peer match-ups using KNN Euclidean distance matching.
 * **FR-05 (Stochastic Risk Engine):** Run $N=1,000$ Monte Carlo bout iterations with Gaussian damage volatility to calculate expected win rates, method-of-victory distributions, and 95% duration confidence intervals.
+For UI via Streamlit, a max of $N=200$ simulation runs are allowed while 1,000 runs work in the backend for technical precision and assurance.
 * **FR-06 (Tactical Stances):** Model output trade-offs across 4 professional combat states (Standard, High-Output Power, High-Efficiency Flow, Ascended Peak Output).
 * **FR-07 (Agentic Analytics Suite):** Expose analytical tools via FastMCP (`src/agent/tools.py`), orchestrate reasoning loops (`copilot.py`), and enforce receipt-style numerical verification (`auditor.py`).
 * **FR-08 (Deterministic Evals):** Benchmark agent tool selection and numerical accuracy across 20+ golden scenarios (`evals/`).
