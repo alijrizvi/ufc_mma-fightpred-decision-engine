@@ -218,16 +218,31 @@ st.subheader("📊 Stochastic Win & Method Probability Breakdown")
 win_rate_a = mc_summary.win_rate_a * 100.0
 win_rate_b = mc_summary.win_rate_b * 100.0
 
+# Extract KO/TKO & Submission probabilities safely regardless of key casing
 method_counts = getattr(mc_summary, "method_breakdown", None)
 if isinstance(method_counts, dict) and method_counts:
-    ko_pct = method_counts.get("KO/TKO", 0.0) * 100.0
-    sub_pct = method_counts.get("Submission", 0.0) * 100.0
-    dec_pct = method_counts.get("Decision", 0.0) * 100.0
+    ko_raw = sum(v for k, v in method_counts.items() if "ko" in k.lower())
+    sub_raw = sum(v for k, v in method_counts.items() if "sub" in k.lower())
+    # Normalize if stored as counts instead of 0-1 proportions
+    total_mc = sum(method_counts.values())
+    if total_mc > 1.5:
+        ko_pct = (ko_raw / total_mc) * 100.0
+        sub_pct = (sub_raw / total_mc) * 100.0
+    else:
+        ko_pct = ko_raw * 100.0
+        sub_pct = sub_raw * 100.0
 else:
     finish_ratio = min(0.85, max(0.20, 1.0 - (mc_summary.avg_finish_interval / (max_rounds * 30.0))))
     ko_pct = finish_ratio * 0.65 * 100.0
     sub_pct = finish_ratio * 0.35 * 100.0
-    dec_pct = (1.0 - finish_ratio) * 100.0
+
+# Convert most likely finish interval (30 intervals = 5:00 per round) into Round + M:SS
+likely_interval = max(1, min(max_rounds * 30, int(round(mc_summary.avg_finish_interval))))
+finish_round = ((likely_interval - 1) // 30) + 1
+seconds_into_round = (((likely_interval - 1) % 30) + 1) * 10
+finish_min = seconds_into_round // 60
+finish_sec = seconds_into_round % 60
+most_likely_finish_str = f"R{finish_round} ({finish_min}:{finish_sec:02d})"
 
 # --- SLEEK, SLIM CORNER-COLORED FIGHTER CARDS ---
 _cards = load_cards()
@@ -247,11 +262,11 @@ for _slot, _name, _corner_cls in (
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
 m1, m2, m3, m4, m5 = st.columns(5)
-m1.metric(f"{fighter_a} Win Prob", f"{win_rate_a:.1f}%")
-m2.metric(f"{fighter_b} Win Prob", f"{win_rate_b:.1f}%")
-m3.metric("KO / TKO Finish Prob", f"{ko_pct:.1f}%")
-m4.metric("Submission Prob", f"{sub_pct:.1f}%")
-m5.metric("Decision / Avg End", f"{dec_pct:.1f}% • Int {mc_summary.avg_finish_interval:.0f}")
+m1.metric(f"{fighter_a} Win %", f"{win_rate_a:.1f}%")
+m2.metric(f"{fighter_b} Win %", f"{win_rate_b:.1f}%")
+m3.metric("KO / TKO Finish %", f"{ko_pct:.1f}%")
+m4.metric("Submission Prob %", f"{sub_pct:.1f}%")
+m5.metric("Most Likely Finish", most_likely_finish_str)
 
 bout_winner = getattr(single_bout, "winner", "Draw")
 bout_method = (
