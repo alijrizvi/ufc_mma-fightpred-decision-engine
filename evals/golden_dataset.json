@@ -136,7 +136,7 @@
     "id": "EVAL-19",
     "type": "unknown_fighter_graceful_error",
     "fighter_a": "Islam Makhachev",
-    "fighter_b": "Jon Jones",
+    "fighter_b": "Nobody Unknown",
     "expected_status": "error"
   },
   {

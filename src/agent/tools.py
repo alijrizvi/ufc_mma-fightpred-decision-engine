@@ -7,16 +7,10 @@ from functools import lru_cache
 from typing import Any, Dict
 
 from src.agent.schemas import MetricQueryResponse, SimulationResponse
-from src.engine.etl import OctagonDataEngine
 from src.engine.intervals import wilson_interval
 from src.engine.monte_carlo import MonteCarloRiskEngine
+from src.engine.profiles import profile_from_layer
 from src.engine.semantic import SemanticLayer
-
-
-def _seeded_db() -> OctagonDataEngine:
-    db_engine = OctagonDataEngine()
-    db_engine.seed_historical_lightweight_dataset()
-    return db_engine
 
 
 @lru_cache(maxsize=1)
@@ -47,12 +41,14 @@ def query_semantic_metric(fighter_name: str, metric_name: str) -> Dict[str, Any]
 def run_stochastic_simulation(fighter_a: str, fighter_b: str, num_simulations: int = 1000) -> Dict[str, Any]:
     """Runs N Monte Carlo bouts and returns win-rate distributions.
 
+    Profiles come from the published rating cards through the governed bridge (ADR 026).
+
     Raises:
-        ValueError: If either fighter is not in the DuckDB profile table.
+        UnknownFighterError: If either fighter has no published card (a ValueError).
     """
-    db_engine = _seeded_db()
-    prof_a = db_engine.load_fighter_profile(fighter_a)
-    prof_b = db_engine.load_fighter_profile(fighter_b)
+    layer = get_semantic_layer()
+    prof_a = profile_from_layer(layer, fighter_a)
+    prof_b = profile_from_layer(layer, fighter_b)
 
     summary = MonteCarloRiskEngine(num_simulations=num_simulations).run_bout_simulation(prof_a, prof_b)
     wins_a = round(summary.win_rate_a * num_simulations)

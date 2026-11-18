@@ -227,6 +227,8 @@ def attribute_weights(model: FittedModel) -> Dict[str, AttributeWeights]:
 def percentile_of(value: float, population: np.ndarray) -> float:
     """Mid-rank percentile of ``value`` within ``population`` (ties count half)."""
     population = np.asarray(population, dtype=float)
+    if population.size == 0:
+        return 0.5  # no peers to rank against: neutral, never NaN
     return float((population < value).mean() + 0.5 * (population == value).mean())
 
 
