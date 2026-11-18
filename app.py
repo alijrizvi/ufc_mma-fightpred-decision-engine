@@ -107,11 +107,7 @@ ARCHETYPE_MAP = {f: stance_label(profile_from_layer(layer, f)) for f in FIGHTER_
 
 # --- HEADER ---
 provenance_label = getattr(warehouse, "provenance", DATA_PROVENANCE).upper()
-st.title("🥋 CageQuant: UFC Octagon Decision Intelligence Engine")
-st.caption(
-    f"10-Second Discrete Combat Telemetry • Calibrated XGBoost • Monte Carlo Risk Engine • "
-    f"Receipt-Verified Agentic Copilot | Data Provenance: `{provenance_label}`"
-)
+st.title("🥋 MMA Fight Prediction Engine")
 
 # --- SIDEBAR: BOUT & ANIMATED PLAYBACK CONTROLS ---
 with st.sidebar:
@@ -211,11 +207,11 @@ for _slot, _name in ((_card_a, fighter_a), (_card_b, fighter_b)):
         st.markdown(render_card_html(_cards.get(_name), name=_name), unsafe_allow_html=True)
 
 m1, m2, m3, m4, m5 = st.columns(5)
-m1.metric(f"{fighter_a} Win Prob", f"{win_rate_a:.1f}%")
-m2.metric(f"{fighter_b} Win Prob", f"{win_rate_b:.1f}%")
-m3.metric("KO / TKO Finish Prob", f"{ko_pct:.1f}%")
-m4.metric("Submission Prob", f"{sub_pct:.1f}%")
-m5.metric("Decision / Avg End", f"{dec_pct:.1f}% • Exchange {mc_summary.avg_finish_interval:.0f}")
+m1.metric(f"\n{fighter_a} Win Prob", f"{win_rate_a:.1f}%")
+m2.metric(f"\n{fighter_b} Win Prob", f"{win_rate_b:.1f}%")
+m3.metric("\nKO / TKO Finish Prob", f"{ko_pct:.1f}%")
+m4.metric("\nSubmission Prob", f"{sub_pct:.1f}%")
+m5.metric("\nDecision / Avg End", f"{dec_pct:.1f}% • Exchange {mc_summary.avg_finish_interval:.0f}")
 
 bout_winner = getattr(single_bout, "winner", "Draw")
 bout_method = (
