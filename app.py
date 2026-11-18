@@ -29,35 +29,60 @@ st.set_page_config(
     layout="wide",
 )
 
-# --- FLOATING ROBOT CHATBOT & SLEEK FIGHTER CARD STYLING ---
+# --- FLOATING ROBOT HEAD CHATBOT & SLEEK FIGHTER CARD STYLING ---
 st.markdown(
     """
     <style>
-    /* Anchor the floating robot head button in the medial top-right viewport */
+    /* Collapse popover wrapper so it never stretches into a full-width bar */
     div[data-testid="stPopover"] {
-        position: fixed;
-        top: 82px;
-        right: 34px;
-        z-index: 9999;
+        position: fixed !important;
+        top: 165px !important;
+        right: 36px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        z-index: 9999 !important;
     }
-    div[data-testid="stPopover"] > button {
-        width: 58px;
-        height: 58px;
-        border-radius: 50%;
-        font-size: 28px;
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        color: #38bdf8;
-        border: 2px solid #38bdf8;
-        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.35);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    /* Style the trigger strictly as a 56x56 circular floating robot head */
+    div[data-testid="stPopover"] > button,
+    button[data-testid="stPopoverButton"] {
+        width: 56px !important;
+        min-width: 56px !important;
+        max-width: 56px !important;
+        height: 56px !important;
+        min-height: 56px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+        color: #38bdf8 !important;
+        border: 2px solid #38bdf8 !important;
+        box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4) !important;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
     }
-    div[data-testid="stPopover"] > button:hover {
-        transform: scale(1.08);
-        box-shadow: 0 10px 28px rgba(56, 189, 248, 0.6);
+
+    div[data-testid="stPopover"] > button:hover,
+    button[data-testid="stPopoverButton"]:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 10px 28px rgba(56, 189, 248, 0.65) !important;
     }
-    /* Hide the default downward caret icon inside the circular robot head button */
-    div[data-testid="stPopover"] > button svg {
-        display: none;
+
+    /* Center the robot emoji cleanly inside the circle */
+    div[data-testid="stPopover"] > button p,
+    button[data-testid="stPopoverButton"] p {
+        font-size: 28px !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Hide the default downward chevron icon */
+    div[data-testid="stPopover"] > button svg,
+    button[data-testid="stPopoverButton"] svg {
+        display: none !important;
     }
 
     /* Sleek, slim, corner-colored fighter card containers */
@@ -78,7 +103,6 @@ st.markdown(
         border: 1px solid rgba(96, 165, 250, 0.45);
         box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
     }
-    /* Keep inner card content compact and prevent full-width stretching */
     .fighter-card-shell > div {
         width: 100% !important;
         max-width: 100% !important;
@@ -117,7 +141,7 @@ def get_warehouse(_version: str = "v9_running_total_area") -> OctagonDataEngine:
     return engine
 
 
-warehouse = get_warehouse()  # still feeds the interval predictor; fighters themselves come from the cards
+warehouse = get_warehouse()
 
 
 @st.cache_resource
@@ -218,12 +242,10 @@ st.subheader("📊 Stochastic Win & Method Probability Breakdown")
 win_rate_a = mc_summary.win_rate_a * 100.0
 win_rate_b = mc_summary.win_rate_b * 100.0
 
-# Extract KO/TKO & Submission probabilities safely regardless of key casing
 method_counts = getattr(mc_summary, "method_breakdown", None)
 if isinstance(method_counts, dict) and method_counts:
     ko_raw = sum(v for k, v in method_counts.items() if "ko" in k.lower())
     sub_raw = sum(v for k, v in method_counts.items() if "sub" in k.lower())
-    # Normalize if stored as counts instead of 0-1 proportions
     total_mc = sum(method_counts.values())
     if total_mc > 1.5:
         ko_pct = (ko_raw / total_mc) * 100.0
@@ -236,7 +258,6 @@ else:
     ko_pct = finish_ratio * 0.65 * 100.0
     sub_pct = finish_ratio * 0.35 * 100.0
 
-# Convert most likely finish interval (30 intervals = 5:00 per round) into Round + M:SS
 likely_interval = max(1, min(max_rounds * 30, int(round(mc_summary.avg_finish_interval))))
 finish_round = ((likely_interval - 1) // 30) + 1
 seconds_into_round = (((likely_interval - 1) % 30) + 1) * 10
@@ -258,7 +279,6 @@ for _slot, _name, _corner_cls in (
             unsafe_allow_html=True,
         )
 
-# Explicit vertical breathing room between fighter cards and KPI metrics below
 st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
 m1, m2, m3, m4, m5 = st.columns(5)
