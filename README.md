@@ -1,4 +1,4 @@
-# 🥊 Production-Grade UFC Decision Intelligence Platform]
+# 🥊 Production-Grade UFC Decision Intelligence Platform
 
 [![CI](https://github.com/alijrizvi/ufc_mma-fightpred-decision-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/alijrizvi/ufc_mma-fightpred-decision-engine/actions/workflows/ci.yml)
 [![Weekly refresh](https://github.com/alijrizvi/ufc_mma-fightpred-decision-engine/actions/workflows/weekly.yml/badge.svg)](https://github.com/alijrizvi/ufc_mma-fightpred-decision-engine/actions/workflows/weekly.yml)
