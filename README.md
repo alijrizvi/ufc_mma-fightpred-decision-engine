@@ -16,11 +16,15 @@
 
 ## 1. What It Does (30 seconds)
 
+You an MMA fan? You certainly know about the UFC. Well, here's something even cooler for you!
+
 1. **Rates fighters.** Six attributes (ATT, DEF, WRE, SUB, STA, PSY) scaled 65-99, built from real UFCStats data.
 2. **Simulates fights.** Pick two fighters, run up to 200 Monte Carlo bouts, get win probabilities, finish methods, and 95% confidence intervals.
 3. **Explains itself safely.** A copilot writes the tactical brief, and an auditor checks every claim against the simulation. A wrong number is refused, never shown.
+4. **(Optional) Your personal Chatbot.** A chatbot/AI assistant on the platform, with whom you can communicate in natural, everyday language and ask questions, discuss findings, etc.
 
-Think of it as a **restaurant**: the data pipeline is the kitchen, the semantic layer is the fixed menu, the model is the chef, the copilot is the waiter, and the auditor is the health inspector.
+Think of it as a **restaurant**: the data pipeline is the kitchen; the semantic layer is the fixed menu; the model is the chef; the copilot is the waiter; and the auditor is the health inspector.
+And, of course, you, the reader, are the customer! So enjoy your meal. 😉
 
 ---
 
