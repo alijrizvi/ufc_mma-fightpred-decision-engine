@@ -6,7 +6,7 @@
 ![Docker](https://img.shields.io/badge/docker-ready-2496ED)
 ![MCP](https://img.shields.io/badge/agent-FastMCP-green)
 
-**[▶ Live demo](https://ufc-mma-cagequant-fightpred-decision-engine.streamlit.app/)** · FIFA-style fighter rating cards, a Monte Carlo fight simulator, and an AI copilot whose every number is audited before you see it.
+**[▶ Live demo](https://ufc-mma-fightpred-decision-engine.streamlit.app/)** · FIFA-style fighter rating cards, a Monte Carlo fight simulator, and an AI copilot whose every number is audited before you see it.
 
 > **Production-Oriented** project - not a full-scale intelligent AI data/ML system.
 
