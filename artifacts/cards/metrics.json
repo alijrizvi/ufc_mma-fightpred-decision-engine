@@ -1,13 +1,39 @@
 {
-  "as_of": "2026-11-16",
+  "as_of": "2026-11-23",
   "metrics": {
-    "accuracy": 0.6017116524028966,
-    "auc": 0.6427204061674192,
-    "brier": 0.23514693167203846,
-    "log_loss": 0.6626811102188199,
-    "n": 1519,
-    "train_n": 4808
+    "accuracy": 0.603638726445744,
+    "auc": 0.6428298744252514,
+    "brier": 0.23517069095363852,
+    "log_loss": 0.6627382859575268,
+    "n": 1539,
+    "train_n": 4813
+  },
+  "rating_shift": {
+    "ATT": {
+      "mean_abs_change": 0.321,
+      "share_moved_over_10": 0.0004
+    },
+    "DEF": {
+      "mean_abs_change": 0.3566,
+      "share_moved_over_10": 0.0007
+    },
+    "PSY": {
+      "mean_abs_change": 0.4101,
+      "share_moved_over_10": 0.0004
+    },
+    "STA": {
+      "mean_abs_change": 0.3979,
+      "share_moved_over_10": 0.0007
+    },
+    "SUB": {
+      "mean_abs_change": 0.2642,
+      "share_moved_over_10": 0.0004
+    },
+    "WRE": {
+      "mean_abs_change": 0.431,
+      "share_moved_over_10": 0.0
+    }
   },
   "train_cutoff": "2023-12-31",
-  "version_id": "v2026-11-16"
+  "version_id": "v2026-11-23"
 }
