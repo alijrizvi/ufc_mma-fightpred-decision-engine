@@ -62,6 +62,95 @@ And, of course, you, the reader, are the customer! So enjoy your meal. 😉
 
 ## 4. Architecture
 
+4. Architecture
+Pipeline at a Glance
+
+A. Weekly data pipeline (robot, Mondays 09:00 UTC)
+
+```text
+UFCStats CSVs (4 files) ──▶ ingest.py           ──▶ staged, schema-checked snapshot
+                                  │
+                                  ▼
+                            medallion.py        ──▶ Bronze (raw) → Silver (clean) → Gold (fighter + bout tables)
+                                  │
+                                  ▼
+                            features.py         ──▶ point-in-time features, Bayesian shrinkage
+                                  │
+                                  ▼
+                            ratings.py          ──▶ Elastic-Net model, 2024-26 validation, 65-99 percentile ratings
+                                  │
+                                  ▼
+                            pipeline.py         ──▶ model gate ▶ card integrity gate ▶ atomic publish
+                                  │
+                                  ▼
+                       artifacts/cards/         ──▶ cards.json, metrics.json (+ rating-shift report), model registry
+                                  │
+                                  ▼
+                           weekly.yml           ──▶ bot commits to main ▶ CI + Docker build re-run
+```
+
+B. Agent harness (on every Copilot question)
+
+```text
+User picks 2 fighters ──▶ metrics.yml + semantic.py ──▶ governed ratings (unknown names fail loudly)
+                                  │
+                                  ▼
+                            profiles.py         ──▶ 6 ratings → 12 combat parameters
+                                  │
+                                  ▼
+                  tools.py (monte_carlo.py)     ──▶ ground truth: win rates, finish methods, Wilson 95% CIs
+                                  │
+                                  ▼
+                            copilot.py          ──▶ narrator (Claude or mock): brief + structured claims
+                                  │
+                                  ▼
+                            auditor.py          ──▶ every claim checked within ±1.5 pts
+                                  │
+                         ┌────────┴────────┐
+                       PASS              FAIL
+                         │                 │
+                         ▼                 ▼
+                  verified brief     retry once with feedback ──▶ still failing? refuse
+```
+
+C. Execution model (who runs what, when)
+
+```text
+GitHub Actions cron ──▶ refresh data + cards      (weekly, unattended, fails loudly)
+GitHub Actions CI   ──▶ ruff + pytest + evals + docker build   (every push / PR)
+Streamlit app.py    ──▶ reads published cards, simulates, shows brief   (on demand, read-only)
+FastMCP server      ──▶ same audited tools for Claude Desktop / Cursor  (on demand)
+Docker container    ──▶ app + cards packaged for any Linux host
+```
+
+Component map:
+
+```text
+ UFCStats CSVs ──► ingest.py (schema-checked) ──► medallion.py (Bronze → Silver → Gold, DuckDB)
+                                                        │
+                       features.py (point-in-time) ◄────┘
+                                │
+                 ratings.py (train → gate → cards)  ──►  pipeline.py (weekly, publish-last)
+                                                              │
+                                              artifacts/cards/cards.json + metrics.json
+                                                              │
+   config/metrics.yml ► semantic.py ► tools.py ◄── profiles.py (ratings → simulator)
+                                         │
+                      harness.py (plan → run → narrate → audit → retry/refuse)
+                         ├─ copilot.py   (narrator: Claude or deterministic mock)
+                         └─ auditor.py   (structured claims, ±1.5 pt tolerance)
+                                         │
+                            app.py (Streamlit)   mcp_server.py (FastMCP)
+```
+
+Key design choices (all logged in config/decision-log.md):
+
+Governed metrics: config/metrics.yml is the single menu of metric names. A typo fails loudly, never guesses.
+The LLM phrases, never calculates. Numbers come only from tools.py.
+Publish-last pipeline: a bad week can never overwrite a good one.
+Deterministic CI: the LLM is mocked, so tests are free and repeatable.
+
+
 ```text
  UFCStats CSVs ──► ingest.py (schema-checked) ──► medallion.py (Bronze → Silver → Gold, DuckDB)
                                                         │
