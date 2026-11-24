@@ -62,10 +62,9 @@ And, of course, you, the reader, are the customer! So enjoy your meal. 😉
 
 ## 4. Architecture
 
-4. Architecture
-Pipeline at a Glance
+### Pipeline at a Glance
 
-A. Weekly data pipeline (robot, Mondays 09:00 UTC)
+### A. Weekly data pipeline (robot, Mondays 09:00 UTC)
 
 ```text
 UFCStats CSVs (4 files) ──▶ ingest.py           ──▶ staged, schema-checked snapshot
@@ -89,7 +88,7 @@ UFCStats CSVs (4 files) ──▶ ingest.py           ──▶ staged, schema-c
                            weekly.yml           ──▶ bot commits to main ▶ CI + Docker build re-run
 ```
 
-B. Agent harness (on every Copilot question)
+### B. Agent harness (on every Copilot question)
 
 ```text
 User picks 2 fighters ──▶ metrics.yml + semantic.py ──▶ governed ratings (unknown names fail loudly)
@@ -113,7 +112,7 @@ User picks 2 fighters ──▶ metrics.yml + semantic.py ──▶ governed rat
                   verified brief     retry once with feedback ──▶ still failing? refuse
 ```
 
-C. Execution model (who runs what, when)
+### C. Execution model (who runs what, when)
 
 ```text
 GitHub Actions cron ──▶ refresh data + cards      (weekly, unattended, fails loudly)
@@ -123,33 +122,7 @@ FastMCP server      ──▶ same audited tools for Claude Desktop / Cursor  (o
 Docker container    ──▶ app + cards packaged for any Linux host
 ```
 
-Component map:
-
-```text
- UFCStats CSVs ──► ingest.py (schema-checked) ──► medallion.py (Bronze → Silver → Gold, DuckDB)
-                                                        │
-                       features.py (point-in-time) ◄────┘
-                                │
-                 ratings.py (train → gate → cards)  ──►  pipeline.py (weekly, publish-last)
-                                                              │
-                                              artifacts/cards/cards.json + metrics.json
-                                                              │
-   config/metrics.yml ► semantic.py ► tools.py ◄── profiles.py (ratings → simulator)
-                                         │
-                      harness.py (plan → run → narrate → audit → retry/refuse)
-                         ├─ copilot.py   (narrator: Claude or deterministic mock)
-                         └─ auditor.py   (structured claims, ±1.5 pt tolerance)
-                                         │
-                            app.py (Streamlit)   mcp_server.py (FastMCP)
-```
-
-Key design choices (all logged in config/decision-log.md):
-
-Governed metrics: config/metrics.yml is the single menu of metric names. A typo fails loudly, never guesses.
-The LLM phrases, never calculates. Numbers come only from tools.py.
-Publish-last pipeline: a bad week can never overwrite a good one.
-Deterministic CI: the LLM is mocked, so tests are free and repeatable.
-
+### Component map:
 
 ```text
  UFCStats CSVs ──► ingest.py (schema-checked) ──► medallion.py (Bronze → Silver → Gold, DuckDB)
