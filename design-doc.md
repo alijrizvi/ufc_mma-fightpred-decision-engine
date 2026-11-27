@@ -21,6 +21,7 @@ UFC Fight Predictor Engine, inspired and powered by _CageQuant_, is a modular de
 
 ## Data & Agentic Architecture + Data Flow
 
+```text
 DATA SPINE ───────────────────────────────────────── 1. Data Architecture
 UFCStats CSVs ─▶ ingest.py ─▶ BRONZE ─▶ SILVER ─▶ GOLD ─▶ features.py
  (4 files)       schema check    raw      clean    bouts    point-in-time
@@ -60,3 +61,4 @@ OPS ─────────────────────────�
 Weekly cron ─▶ fetch ─▶ train ─▶ 2 gates ─▶ publish ─▶ bot commit ─▶ CI
 CI: ruff · pytest · 25 evals (100%) · docker build      ADRs: decision-log.md
 Not used: MLflow · DVC · Evidently (file registry + rating-shift report instead)
+```
